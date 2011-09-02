@@ -1,0 +1,14 @@
+@prefix sparql: <http://www.w3.org/TR/rdf-sparql-query/#> .
+@prefix sawsdl: <http://www.w3.org/ns/sawsdl#> .
+@prefix wsl: <http://www.wsmo.org/wsmo-lite#> .
+@prefix posm: <http://www.wsmo.org/ns/posm/0.1#> .
+@prefix voc: <REPLACE_ME> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+
+voc:search rdf:type posm:Service;
+posm:hasInputMessage [sawsdl:modelReference _:input];
+posm:hasOutputMessage [sawsdl:modelReference _:output].
+_:input rdf:value "{ { ?uri a rdf:Property } UNION {?uri a rdfs:Class} }"^^sparql:GraphPattern .
+_:output rdf:value "{ { ?uri voc:classUsedInDatasets ?cds; voc:usedAsClass ?co. OPTIONAL {?uri voc:posInClassDatasetRanking ?posCD; voc:posInClassRanking ?posC} } UNION { ?uri voc:propertyUsedInDatasets ?pds; voc:usedAsProperty ?po. OPTIONAL{ ?uri voc:posInPropDatasetRanking ?posPD; voc:posInPropRanking ?posP} } }"^^sparql:GraphPattern .
