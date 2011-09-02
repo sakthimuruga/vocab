@@ -11,7 +11,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -43,6 +46,8 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 @Path("/")
 public class Voc {
+	
+	
 	
 	@Path("search")
 	@GET
@@ -236,7 +241,10 @@ public class Voc {
 		
 		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
-		return Response.ok( resp).build();
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.HOUR, 1);
+		c.add(Calendar.DAY_OF_MONTH, 1);
+		return Response.ok( resp).header("Cache-Control", "public").header("Expires", Listener.RFC822.format(c.getTime())).build();
 	}
 	
 	@Path("tcd")
@@ -254,7 +262,10 @@ public class Voc {
 		
 		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
-		return Response.ok( resp).build();
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.HOUR, 1);
+		c.add(Calendar.DAY_OF_MONTH, 1);
+		return Response.ok( resp).header("Cache-Control", "public").header("Expires", Listener.RFC822.format(c.getTime())).build();
 	}
 	
 	@Path("tpo")
@@ -272,7 +283,10 @@ public class Voc {
 		
 		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
-		return Response.ok( resp).build();
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.HOUR, 1);
+		c.add(Calendar.DAY_OF_MONTH, 1);
+		return Response.ok( resp).header("Cache-Control", "public").header("Expires", Listener.RFC822.format(c.getTime())).build();
 	}
 	
 	@Path("tpd")
@@ -290,7 +304,10 @@ public class Voc {
 		
 		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
-		return Response.ok( resp).build();
+		Calendar c = Calendar.getInstance();
+		c.add(Calendar.HOUR, 1);
+		c.add(Calendar.DAY_OF_MONTH, 1);
+		return Response.ok( resp).header("Cache-Control", "public").header("Expires", Listener.RFC822.format(c.getTime())).build();
 	}
 	
 	/*
