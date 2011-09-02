@@ -10,9 +10,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -25,7 +27,7 @@ public class Listener implements ServletContextListener {
 	static String mapC = "mapCAttribute";
 	static String mapP = "mapPAttribute";
 	static String prefixes = "prefAttribute";
-
+	public static SimpleDateFormat RFC822 = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z", Locale.US);
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent arg0) {
