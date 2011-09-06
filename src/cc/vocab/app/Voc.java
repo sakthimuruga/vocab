@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -52,13 +54,13 @@ public class Voc {
 	@Path("search")
 	@GET
 	@Produces("text/html")
-	public Response searchHTML(@QueryParam("query") String query, @Context ServletContext cont) throws IOException{
+	public Response searchHTML(@QueryParam("query") String query, @Context ServletContext cont, @Context UriInfo info) throws IOException{
 		//resolve prefixes
 		if(!query.startsWith("http://")){
 			Map<String, String> pref = (Map<String, String>) cont.getAttribute(Listener.prefixes);
 			String full = pref.get(query.split(":")[0]);
 			if(full==null || full.isEmpty() || full.equals("???")){
-				return notFound(query, cont);
+				return notFound(query, cont, info);
 			}
 			query = full+query.split(":")[1];
 		}
@@ -102,7 +104,8 @@ public class Voc {
 		
 		//construct output if possible
 		if(pro > 0 || cl > 0){
-			String ret = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", query);
+			
+			String ret = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", makeLink(query, info));
 			ret = (cl > pro) ? ret	.replace("REPLACE_KIND", "Class")
 									.replace("REPLACE_OCCUR", "Occured overall "+beauStr(cNO)+" times <BR> and in "+beauStr(cND)+" datasets.")
 									.replace("REPLACE_POSITION", "Is in Position "+beauStr(cPosO)+ " in the overall ranking <BR> " +
@@ -113,7 +116,7 @@ public class Voc {
 							 				"and in Position "+beauStr(pPosD)+" of the dataset ranking.")  ;
 			return Response.ok(ret).build();
 		}else{
-			return notFound(query, cont);
+			return notFound(query, cont, info);
 		}
 	}
 	
@@ -229,13 +232,13 @@ public class Voc {
 	@Path("tco")
 	@GET
 	@Produces("text/html")
-	public Response tcoHTML(@Context ServletContext cont, @Context UriInfo info ){
+	public Response tcoHTML(@Context ServletContext cont, @Context UriInfo info ) throws UnsupportedEncodingException{
 		Map<Integer, String> map =getTopCo(cont);
 		String rep = "<table border=\"0\">";
 		rep += "<tr><td>No.</td><td></td><td>Occured Overall</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td><a href=\""+tmp.split("\t")[1]+"\"	>"+tmp.split("\t")[1]+"</a></td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
@@ -250,13 +253,13 @@ public class Voc {
 	@Path("tcd")
 	@GET
 	@Produces("text/html")
-	public Response tcdHTML(@Context ServletContext cont, @Context UriInfo info ){
+	public Response tcdHTML(@Context ServletContext cont, @Context UriInfo info ) throws UnsupportedEncodingException{
 		Map<Integer, String> map =getTopCd(cont);
 		String rep = "<table border=\"0\">";
 		rep += "<tr><td>No.</td><td></td><td>Occured in Datasets</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td><a href=\""+tmp.split("\t")[1]+"\">"+tmp.split("\t")[1]+"</a></td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
@@ -271,13 +274,13 @@ public class Voc {
 	@Path("tpo")
 	@GET
 	@Produces("text/html")
-	public Response tpoHTML(@Context ServletContext cont, @Context UriInfo info ){
+	public Response tpoHTML(@Context ServletContext cont, @Context UriInfo info ) throws UnsupportedEncodingException{
 		Map<Integer, String> map =getTopPo(cont);
 		String rep = "<table border=\"0\">";
 		rep += "<tr><td>No.</td><td></td><td>Occured Overall</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td><a href=\""+tmp.split("\t")[1]+"\">"+tmp.split("\t")[1]+"</a></td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
@@ -292,13 +295,13 @@ public class Voc {
 	@Path("tpd")
 	@GET
 	@Produces("text/html")
-	public Response tpdHTML(@Context ServletContext cont, @Context UriInfo info ){
+	public Response tpdHTML(@Context ServletContext cont, @Context UriInfo info ) throws UnsupportedEncodingException{
 		Map<Integer, String> map =getTopPd(cont);
 		String rep = "<table border=\"0\">";
 		rep += "<tr><td>No.</td><td></td><td>Occured in Datasets</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td><a href=\""+tmp.split("\t")[1]+"\">"+tmp.split("\t")[1]+"</a></td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
@@ -414,8 +417,8 @@ public class Voc {
 	
 	
 	//create not found page
-	private Response notFound(String f, ServletContext cont){
-		String ret = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", f)
+	private Response notFound(String f, ServletContext cont, UriInfo info) throws UnsupportedEncodingException{
+		String ret = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", makeLink(f, info))
 			.replace("REPLACE_KIND", "")
 			.replace("REPLACE_OCCUR", "could not be found")
 			.replace("REPLACE_POSITION", "");
@@ -473,7 +476,16 @@ public class Voc {
 		return map;
 	}
 		
-	
+	private String makeLink (String query, UriInfo info) throws UnsupportedEncodingException{
+		String  link = "<a href=\""+info.getBaseUri()+"search?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
+				"<a class=\"namespace-link\" href=\""+query+"\" rel=\"nofollow\"> <img src=\""+info.getBaseUri()+"img/link.png\" title=\"go to the vocabulary\" /></a> ";
+		return link;
+	}
+	private String makeLink_sm (String query, UriInfo info) throws UnsupportedEncodingException{
+		String  link = "<a href=\""+info.getBaseUri()+"search?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
+				"<a class=\"namespace-link\" href=\""+query+"\" rel=\"nofollow\"> <img src=\""+info.getBaseUri()+"img/link_sm.png\" title=\"go to the vocabulary\" /></a> ";
+		return link;
+	}
 	
 	//read file as String
 	private static String readFile(String in, ServletContext cont) {
