@@ -106,7 +106,9 @@ h2.alternate {
 .page-about p, .page-about li, .page-about h2 {
     text-align: left;
 }
-.page-about table { border-collapse: collapse; }
+.page-about table { 
+	border-collapse: collapse; 
+	}
 .page-about td, .page-about th { margin: 0; padding: 0; }
 .page-about th { text-align: left; }
 .page-about th#format { padding-right: 1.5em; }
