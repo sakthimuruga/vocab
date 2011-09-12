@@ -16,10 +16,13 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.FormParam;
@@ -51,7 +54,7 @@ public class Voc {
 	
 	
 	
-	@Path("search")
+	@Path("lookup")
 	@GET
 	@Produces("text/html")
 	public Response searchHTML(@QueryParam("query") String query, @Context ServletContext cont, @Context UriInfo info) throws IOException{
@@ -121,7 +124,7 @@ public class Voc {
 	}
 	
 	
-	@Path("search")
+	@Path("lookup")
 	@GET
 	@Produces("application/rdf+xml")
 	public Response searchXML(@QueryParam("query") String query,  @Context ServletContext cont, @Context UriInfo info ) throws IOException{
@@ -143,7 +146,7 @@ public class Voc {
 		return Response.ok(outstr.toString()).build();
 	}
 	
-	@Path("search")
+	@Path("lookup")
 	@GET
 	@Produces("text/N3")
 	public Response searchN3(@QueryParam("query") String query,  @Context ServletContext cont, @Context UriInfo info ) throws IOException{
@@ -165,7 +168,7 @@ public class Voc {
 		return Response.ok(outstr.toString()).build();
 	}
 	
-	@Path("search")
+	@Path("lookup")
 	@POST
 	@Produces("application/rdf+XML")
 	public Response searchXML_p(@FormParam("input") String input,  @Context ServletContext cont, @Context UriInfo info ){
@@ -174,7 +177,7 @@ public class Voc {
 		out.write(outstr, null);
 		return Response.ok(outstr.toString()).build();
 	}
-	@Path("search")
+	@Path("lookup")
 	@POST
 	@Produces("text/N3")
 	public Response searchN3_p(@FormParam("input") String input,  @Context ServletContext cont, @Context UriInfo info ){
@@ -183,7 +186,7 @@ public class Voc {
 		out.write(outstr, "N3");
 		return Response.ok(outstr.toString()).build();
 	}
-	@Path("search")
+	@Path("lookup")
 	@POST
 	@Produces("text/html")
 	public Response searchHTML_p(@FormParam("input") String input,  @Context ServletContext cont, @Context UriInfo info ){
@@ -195,7 +198,7 @@ public class Voc {
 				+"</TEXTAREA>").build();
 	}
 	
-	@Path("search/description")
+	@Path("lookup/description")
 	@GET
 	@Produces("text/html")
 	public Response descHTML(@Context ServletContext cont, @Context UriInfo info ){
@@ -212,7 +215,7 @@ public class Voc {
 		;
 		return Response.ok(ret).build();
 	}
-	@Path("search/description")
+	@Path("lookup/description")
 	@GET
 	@Produces("application/rdf+xml")
 	public Response descXML(@Context ServletContext cont, @Context UriInfo info ){
@@ -220,7 +223,7 @@ public class Voc {
 								.replace("REPLACE_ME", info.getBaseUri().toString()+"schema/" )	)  
 						).build();
 	}
-	@Path("search/description")
+	@Path("lookup/description")
 	@GET
 	@Produces("text/N3")
 	public Response descN3(@Context ServletContext cont, @Context UriInfo info ){
@@ -315,7 +318,30 @@ public class Voc {
 	
 	/*
 	 * HELPER
-	 */	
+	 */		
+	private Set<String> doSearch(String query, ServletContext cont){
+		Map<String, String> map = (Map<String, String>) cont.getAttribute(Listener.searchMap);
+		StringTokenizer tok = new StringTokenizer(query, " ");
+		String first = tok.nextToken();
+		StringTokenizer init = new StringTokenizer(map.get(first), " ");
+		Set<String> s1 = new HashSet<String>();
+		while(init.hasMoreTokens()){
+			s1.add(init.nextToken());
+		}
+		Set<String> intersect = new TreeSet<String>(s1);
+		while(tok.hasMoreTokens()){
+			String other = tok.nextToken();
+			StringTokenizer run = new StringTokenizer(map.get(other), " ");
+			Set<String> so = new HashSet<String>();
+			while(run.hasMoreTokens()){
+				so.add(init.nextToken());
+			}
+			intersect.retainAll(so);
+		}
+		return intersect;
+	}
+	
+	
 	private Model getOutput(String input, ServletContext cont, UriInfo info){
 		Model out = ModelFactory.createDefaultModel();
 		String queryS = "" +
@@ -477,12 +503,12 @@ public class Voc {
 	}
 		
 	private String makeLink (String query, UriInfo info) throws UnsupportedEncodingException{
-		String  link = "<a href=\""+info.getBaseUri()+"search?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
+		String  link = "<a href=\""+info.getBaseUri()+"lookup?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
 				"<a class=\"namespace-link\" href=\""+query+"\" rel=\"nofollow\"> <img src=\""+info.getBaseUri()+"img/link.png\" title=\"go to the vocabulary\" /></a> ";
 		return link;
 	}
 	private String makeLink_sm (String query, UriInfo info) throws UnsupportedEncodingException{
-		String  link = "<a href=\""+info.getBaseUri()+"search?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
+		String  link = "<a href=\""+info.getBaseUri()+"lookup?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
 				"<a class=\"namespace-link\" href=\""+query+"\" rel=\"nofollow\"> <img src=\""+info.getBaseUri()+"img/link_sm.png\" title=\"go to the vocabulary\" /></a> ";
 		return link;
 	}
