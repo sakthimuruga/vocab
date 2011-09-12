@@ -7,7 +7,7 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 
-voc:search rdf:type posm:Service;
+voc:lookup rdf:type posm:Service;
 posm:hasInputMessage [sawsdl:modelReference _:input];
 posm:hasOutputMessage [sawsdl:modelReference _:output].
 _:input rdf:value "{ { ?uri a rdf:Property } UNION {?uri a rdfs:Class} }"^^sparql:GraphPattern .
