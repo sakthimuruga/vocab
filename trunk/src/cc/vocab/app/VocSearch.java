@@ -224,6 +224,8 @@ public class VocSearch {
 		query = query.toLowerCase();
 		@SuppressWarnings("unchecked")
 		Map<String, String> map = (Map<String, String>) cont.getAttribute(Listener.searchMap);
+		@SuppressWarnings("unchecked")
+		Map<String, String> ref = (Map<String, String>) cont.getAttribute(Listener.refMap);
 		StringTokenizer tok = new StringTokenizer(query, " ");
 		String uris = null;
 		while(uris == null && tok.hasMoreTokens()){
@@ -233,10 +235,11 @@ public class VocSearch {
 		if(uris == null){
 			return null;
 		}
+
 		StringTokenizer init = new StringTokenizer(uris, " ");
 		Set<String> s1 = new HashSet<String>();
 		while(init.hasMoreTokens()){
-			s1.add(init.nextToken());
+			s1.add(ref.get(Integer.valueOf(init.nextToken())));
 		}
 		Set<String> intersect = new TreeSet<String>(s1);
 		while(tok.hasMoreTokens()){
@@ -244,7 +247,7 @@ public class VocSearch {
 			StringTokenizer run = new StringTokenizer(map.get(other), " ");
 			Set<String> so = new HashSet<String>();
 			while(run.hasMoreTokens()){
-				so.add(run.nextToken());
+				so.add(ref.get(Integer.valueOf(run.nextToken())));
 			}
 			intersect.retainAll(so);
 		}
