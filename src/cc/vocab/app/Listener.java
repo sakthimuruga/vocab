@@ -28,6 +28,7 @@ public class Listener implements ServletContextListener {
 	static String mapP = "mapPAttribute";
 	static String prefixes = "prefAttribute";
 	static String searchMap = "searchMapAttribute";
+	static String refMap = "referenceMapAttribute";
 	public static SimpleDateFormat RFC822 = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z", Locale.US);
 	
 	@Override
@@ -39,21 +40,58 @@ public class Listener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		ServletContext ctx = event.getServletContext();
-		Map<String, String> mapCval =  getMap( "C", ctx);
-		Map<String, String> mapPval =  getMap( "P", ctx);
+
 		
-		ctx.setAttribute(mapC, mapCval);
-		ctx.setAttribute(mapP, mapPval);
+		ctx.setAttribute(mapC, getMap( "C", ctx));
+		ctx.setAttribute(mapP, getMap( "P", ctx));
 		ctx.setAttribute(prefixes, loadPrf(ctx));
 		
 		ctx.setAttribute(searchMap, getSMap(ctx));
+		ctx.setAttribute(refMap, getRefMap(ctx));
 	
 		
 		//System.out.println(mapCoM.get("http://xmlns.com/foaf/0.1/Person"));
 	}
 	
+	//read reference Map
+	//read search Map
+	private static Map<Integer, String> getRefMap(ServletContext cont){
+		String in = "/files/ref";
+		Map<Integer, String> map = new HashMap<Integer, String>();
+		
+		int i = 0;
+		File fileO = new File(cont.getRealPath("/WEB-INF"+in+"_"+i));
+		
+		do{
 	
-	//read search Maps
+				try {
+					FileReader reader = new FileReader(fileO);
+					BufferedReader br = new BufferedReader(reader);
+			
+				    String eachLine = br.readLine();
+			
+				    while (eachLine != null) {
+				    	
+				    	String[] a = eachLine.split("\t");
+				    		
+				    	map.put(Integer.valueOf(a[0]), a[1]);
+				    	eachLine = br.readLine();
+				    }
+				    i+=1;
+				    fileO = new File(cont.getRealPath("/WEB-INF"+in+"_"+i));
+				    
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}while(fileO.exists());
+		return map;
+	}
+	
+	
 	private static Map<String, String> getSMap(ServletContext cont){
 		String in = "/files/map";
 		Map<String, String> map = new HashMap<String, String>();
@@ -62,9 +100,9 @@ public class Listener implements ServletContextListener {
 		File fileO = new File(cont.getRealPath("/WEB-INF"+in+"_"+i));
 		
 		do{
-			FileReader reader;
+	
 				try {
-					reader = new FileReader(fileO);
+					FileReader reader = new FileReader(fileO);
 					BufferedReader br = new BufferedReader(reader);
 			
 				    String eachLine = br.readLine();
