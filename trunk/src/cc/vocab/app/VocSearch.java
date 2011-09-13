@@ -243,9 +243,13 @@ public class VocSearch {
 		}
 		Set<String> intersect = new TreeSet<String>(s1);
 		while(tok.hasMoreTokens()){
-			String other = tok.nextToken();
-			StringTokenizer run = new StringTokenizer(map.get(other), " ");
 			Set<String> so = new HashSet<String>();
+			String other = tok.nextToken();
+			if(map.get(other)==null){
+				intersect.retainAll(so);
+				continue;
+			}
+			StringTokenizer run = new StringTokenizer(map.get(other), " ");
 			while(run.hasMoreTokens()){
 				so.add(ref.get(Integer.valueOf(run.nextToken())));
 			}
