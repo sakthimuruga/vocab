@@ -1,0 +1,16 @@
+@prefix sparql: <http://www.w3.org/TR/rdf-sparql-query/#> .
+@prefix sawsdl: <http://www.w3.org/ns/sawsdl#> .
+@prefix wsl: <http://www.wsmo.org/wsmo-lite#> .
+@prefix posm: <http://www.wsmo.org/ns/posm/0.1#> .
+@prefix voc: <REPLACE_ME> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix so: <http://purl.org/linkedservices/ontology/SearchOntology#> .
+
+
+voc:search rdf:type posm:Service;
+rdf:type so:SearchEngine;
+posm:hasInputMessage [sawsdl:modelReference _:input];
+posm:hasOutputMessage [sawsdl:modelReference _:output].
+_:input rdf:value "{ [] a so:Query; so:queryString ?qStr . }"^^sparql:GraphPattern .
+_:output rdf:value "{ [] a so:Query; so:queryString ?qStr; so:result ?res. { { ?res a rdfs:Class; voc:usedAsClass ?number. } UNION { ?res a rdf:Property; voc:usedAsProperty ?number. }} }"^^sparql:GraphPattern .

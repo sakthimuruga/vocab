@@ -125,9 +125,15 @@ table.multi a {
 .missing a {
     color: #888;
 }
+
+table {
+	margin-left: auto; 
+    margin-right: auto;
+}
+
 th {
     padding-right: 1em;
-    text-align: right;
+    text-align: left;
 }
 td {
     text-align: left;
@@ -155,27 +161,6 @@ input.home {
     font-size: 1.2em;
     font-weight: bold;
 }
-.page-latest h1 {
-    margin: 1em 0 1em;
-}
-.page-latest table {
-    margin: -1em auto 0;
-}
-.page-latest td, .page-latest th {
-    padding-bottom: 0;
-}
-.page-latest td.meta {
-    font-size: 80%;
-    padding-bottom: 1em;
-    padding-top: 0;
-}
-.page-latest table a {
-    color: #333;
-    text-decoration: none;
-}
-.page-latest .feed-link {
-    margin: 0 auto -4em;
-}
 #logos {
     bottom: 10px;
     left: 15px;
@@ -185,6 +170,6 @@ input.home {
 #logos img {
     vertical-align: bottom;
 }
-#logos #deri-logo {
+#logos {
     margin-left: 8px;
 }

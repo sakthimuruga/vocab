@@ -46,7 +46,7 @@ public class Listener implements ServletContextListener {
 		ctx.setAttribute(mapP, mapPval);
 		ctx.setAttribute(prefixes, loadPrf(ctx));
 		
-		//ctx.setAttribute(searchMap, getSMap(ctx));
+		ctx.setAttribute(searchMap, getSMap(ctx));
 	
 		
 		//System.out.println(mapCoM.get("http://xmlns.com/foaf/0.1/Person"));
