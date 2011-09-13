@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.linkedservices.ServiceDescriptionLab;
-import org.mortbay.util.URIUtil;
+
 
 
 import com.hp.hpl.jena.query.Query;
@@ -55,7 +56,8 @@ public class VocLookup {
 			Map<String, String> pref = (Map<String, String>) cont.getAttribute(Listener.prefixes);
 			String full = pref.get(query.split(":")[0]);
 			if(full==null || full.isEmpty() || full.equals("???")){
-				return Response.temporaryRedirect(URI.create(URIUtil.encodePath("/search?query="+query))).build();
+				String uri = URLEncoder.encode(query, "UTF-8");
+				return Response.temporaryRedirect(URI.create("/search?query="+uri)).build();
 			}
 			query = full+query.split(":")[1];
 		}
@@ -111,7 +113,8 @@ public class VocLookup {
 							 				"and in Position "+beauStr(pPosD)+" of the dataset ranking.")  ;
 			return Response.ok(ret).build();
 		}else{
-			return Response.temporaryRedirect(URI.create(URIUtil.encodePath("/search?query="+query))).build();
+			String uri = URLEncoder.encode(query, "UTF-8");
+			return Response.temporaryRedirect(URI.create("/search?query="+uri)).build();
 		}
 	}
 	
