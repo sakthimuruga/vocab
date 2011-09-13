@@ -1,28 +1,18 @@
 package cc.vocab.app;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
+import java.net.URI;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.FormParam;
@@ -50,7 +40,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 
 @Path("/")
-public class Voc {
+public class VocLookup {
 	
 	
 	
@@ -60,10 +50,11 @@ public class Voc {
 	public Response searchHTML(@QueryParam("query") String query, @Context ServletContext cont, @Context UriInfo info) throws IOException{
 		//resolve prefixes
 		if(!query.startsWith("http://")){
+			@SuppressWarnings("unchecked")
 			Map<String, String> pref = (Map<String, String>) cont.getAttribute(Listener.prefixes);
 			String full = pref.get(query.split(":")[0]);
 			if(full==null || full.isEmpty() || full.equals("???")){
-				return notFound(query, cont, info);
+				return Response.temporaryRedirect(URI.create("/search?query="+query)).build();
 			}
 			query = full+query.split(":")[1];
 		}
@@ -108,7 +99,7 @@ public class Voc {
 		//construct output if possible
 		if(pro > 0 || cl > 0){
 			
-			String ret = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", makeLink(query, info));
+			String ret = VocUtils.readFile("/files/resp.html", cont).replace("REPLACE_QUERY", VocUtils.makeLink(query, info));
 			ret = (cl > pro) ? ret	.replace("REPLACE_KIND", "Class")
 									.replace("REPLACE_OCCUR", "Occured overall "+beauStr(cNO)+" times <BR> and in "+beauStr(cND)+" datasets.")
 									.replace("REPLACE_POSITION", "Is in Position "+beauStr(cPosO)+ " in the overall ranking <BR> " +
@@ -119,7 +110,7 @@ public class Voc {
 							 				"and in Position "+beauStr(pPosD)+" of the dataset ranking.")  ;
 			return Response.ok(ret).build();
 		}else{
-			return notFound(query, cont, info);
+			return Response.temporaryRedirect(URI.create("/search?query="+query)).build();
 		}
 	}
 	
@@ -130,6 +121,7 @@ public class Voc {
 	public Response searchXML(@QueryParam("query") String query,  @Context ServletContext cont, @Context UriInfo info ) throws IOException{
 		//resolve prefixes
 		if(!query.startsWith("http://")){
+			@SuppressWarnings("unchecked")
 			Map<String, String> pref = (Map<String, String>) cont.getAttribute(Listener.prefixes);
 			String full = pref.get(query.split(":")[0]);
 			if(full==null || full.isEmpty() || full.equals("???")){
@@ -152,6 +144,7 @@ public class Voc {
 	public Response searchN3(@QueryParam("query") String query,  @Context ServletContext cont, @Context UriInfo info ) throws IOException{
 		//resolve prefixes
 		if(!query.startsWith("http://")){
+			@SuppressWarnings("unchecked")
 			Map<String, String> pref = (Map<String, String>) cont.getAttribute(Listener.prefixes);
 			String full = pref.get(query.split(":")[0]);
 			if(full==null || full.isEmpty() || full.equals("???")){
@@ -202,15 +195,15 @@ public class Voc {
 	@GET
 	@Produces("text/html")
 	public Response descHTML(@Context ServletContext cont, @Context UriInfo info ){
-		String ret = readFile("/files/description.html", cont)
+		String ret = VocUtils.readFile("/files/description.html", cont)
 		.replace("PLACE_NS" , 
-				ServiceDescriptionLab.getNS(readFile("/files/description.rdf", cont)
+				ServiceDescriptionLab.getNS(VocUtils.readFile("/files/description.rdf", cont)
 						.replace("REPLACE_ME", info.getBaseUri().toString()+"schema/")) )
 		.replace("PLACE_INPUT" , 
-				ServiceDescriptionLab.getInput(readFile("/files/description.rdf", cont)
+				ServiceDescriptionLab.getInput(VocUtils.readFile("/files/description.rdf", cont)
 						.replace("REPLACE_ME", info.getBaseUri().toString()+"schema/")) )
 		.replace("PLACE_OUTPUT" , 
-				ServiceDescriptionLab.getOutput(readFile("/files/description.rdf", cont)
+				ServiceDescriptionLab.getOutput(VocUtils.readFile("/files/description.rdf", cont)
 						.replace("REPLACE_ME", info.getBaseUri().toString()+"schema/")) )				
 		;
 		return Response.ok(ret).build();
@@ -219,7 +212,7 @@ public class Voc {
 	@GET
 	@Produces("application/rdf+xml")
 	public Response descXML(@Context ServletContext cont, @Context UriInfo info ){
-		return Response.ok( ServiceDescriptionLab.getDescAsXML(readFile("/files/description.rdf", cont)
+		return Response.ok( ServiceDescriptionLab.getDescAsXML(VocUtils.readFile("/files/description.rdf", cont)
 								.replace("REPLACE_ME", info.getBaseUri().toString()+"schema/" )	)  
 						).build();
 	}
@@ -227,7 +220,7 @@ public class Voc {
 	@GET
 	@Produces("text/N3")
 	public Response descN3(@Context ServletContext cont, @Context UriInfo info ){
-		return Response.ok( ServiceDescriptionLab.getDescAsN3(readFile("/files/description.rdf", cont)
+		return Response.ok( ServiceDescriptionLab.getDescAsN3(VocUtils.readFile("/files/description.rdf", cont)
 								.replace("REPLACE_ME", info.getBaseUri()+"schema/" )	)  
 						).build();
 	}
@@ -241,11 +234,11 @@ public class Voc {
 		rep += "<tr><td>No.</td><td></td><td>Occured Overall</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+VocUtils.makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
-		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
+		String resp = VocUtils.readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.HOUR, 1);
@@ -262,11 +255,11 @@ public class Voc {
 		rep += "<tr><td>No.</td><td></td><td>Occured in Datasets</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+VocUtils.makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
-		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
+		String resp = VocUtils.readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.HOUR, 1);
@@ -283,11 +276,11 @@ public class Voc {
 		rep += "<tr><td>No.</td><td></td><td>Occured Overall</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+VocUtils.makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
-		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
+		String resp = VocUtils.readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.HOUR, 1);
@@ -304,11 +297,11 @@ public class Voc {
 		rep += "<tr><td>No.</td><td></td><td>Occured in Datasets</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
-			rep += "<tr><td>"+i+"</td><td>"+makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
+			rep += "<tr><td>"+i+"</td><td>"+VocUtils.makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
 		}
 		rep += "</table>";
 		
-		String resp = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
+		String resp = VocUtils.readFile("/files/resp.html", cont).replace("REPLACE_QUERY", "").replace("REPLACE_OCCUR", "").replace("REPLACE_POSITION", "");
 		resp= resp.replace("REPLACE_KIND", rep);
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.HOUR, 1);
@@ -319,34 +312,12 @@ public class Voc {
 	/*
 	 * HELPER
 	 */		
-	private Set<String> doSearch(String query, ServletContext cont){
-		Map<String, String> map = (Map<String, String>) cont.getAttribute(Listener.searchMap);
-		StringTokenizer tok = new StringTokenizer(query, " ");
-		String first = tok.nextToken();
-		StringTokenizer init = new StringTokenizer(map.get(first), " ");
-		Set<String> s1 = new HashSet<String>();
-		while(init.hasMoreTokens()){
-			s1.add(init.nextToken());
-		}
-		Set<String> intersect = new TreeSet<String>(s1);
-		while(tok.hasMoreTokens()){
-			String other = tok.nextToken();
-			StringTokenizer run = new StringTokenizer(map.get(other), " ");
-			Set<String> so = new HashSet<String>();
-			while(run.hasMoreTokens()){
-				so.add(init.nextToken());
-			}
-			intersect.retainAll(so);
-		}
-		return intersect;
-	}
-	
 	
 	private Model getOutput(String input, ServletContext cont, UriInfo info){
 		Model out = ModelFactory.createDefaultModel();
 		String queryS = "" +
 				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+				"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
 				"SELECT ?uri ?type " +
 				"WHERE { " +
 				"		{ ?uri a ?type . FILTER regex( str(?type),  \"http://www.w3.org/1999/02/22-rdf-syntax-ns#Property\") } " +
@@ -421,6 +392,7 @@ public class Voc {
 	
 	//lookup uri in class data files
 	private String lookupC(String uri, ServletContext cont){
+		@SuppressWarnings("unchecked")
 		Map<String, String> cd  = (Map<String, String>) cont.getAttribute(Listener.mapC);
 		String temp = null;
 		temp = cd.get(uri);
@@ -432,6 +404,7 @@ public class Voc {
 	
 	//lookup uri in property data files
 	private String lookupP(String uri, ServletContext cont){
+		@SuppressWarnings("unchecked")
 		Map<String, String> cd  = (Map<String, String>) cont.getAttribute(Listener.mapP);
 		String temp = null;
 		temp = cd.get(uri);
@@ -442,20 +415,11 @@ public class Voc {
 	}
 	
 	
-	//create not found page
-	private Response notFound(String f, ServletContext cont, UriInfo info) throws UnsupportedEncodingException{
-		String ret = readFile("/files/resp.html", cont).replace("REPLACE_QUERY", makeLink(f, info))
-			.replace("REPLACE_KIND", "")
-			.replace("REPLACE_OCCUR", "could not be found")
-			.replace("REPLACE_POSITION", "");
-		return Response.ok(ret).build();
-	}
-	
-	
 	//get top 100
 	private static Map<Integer, String> getTopCo(ServletContext cont) {
 		Map<Integer, String> map = new HashMap<Integer, String>();
 		
+		@SuppressWarnings("unchecked")
 		Set<Entry<String, String>> temp = ((Map<String, String>) cont.getAttribute(Listener.mapC)).entrySet();
 		for(Entry<String, String> e : temp){
 			int pos = Integer.valueOf(e.getValue().split("\t")[0]);
@@ -468,6 +432,7 @@ public class Voc {
 	private static Map<Integer, String> getTopCd(ServletContext cont) {
 		Map<Integer, String> map = new HashMap<Integer, String>();
 		
+		@SuppressWarnings("unchecked")
 		Set<Entry<String, String>> temp = ((Map<String, String>) cont.getAttribute(Listener.mapC)).entrySet();
 		for(Entry<String, String> e : temp){
 			int pos = Integer.valueOf(e.getValue().split("\t")[2]);
@@ -480,6 +445,7 @@ public class Voc {
 	private static Map<Integer, String> getTopPo(ServletContext cont) {
 		Map<Integer, String> map = new HashMap<Integer, String>();
 		
+		@SuppressWarnings("unchecked")
 		Set<Entry<String, String>> temp = ((Map<String, String>) cont.getAttribute(Listener.mapP)).entrySet();
 		for(Entry<String, String> e : temp){
 			int pos = Integer.valueOf(e.getValue().split("\t")[0]);
@@ -492,6 +458,7 @@ public class Voc {
 	private static Map<Integer, String> getTopPd(ServletContext cont) {
 		Map<Integer, String> map = new HashMap<Integer, String>();
 		
+		@SuppressWarnings("unchecked")
 		Set<Entry<String, String>> temp = ((Map<String, String>) cont.getAttribute(Listener.mapP)).entrySet();
 		for(Entry<String, String> e : temp){
 			int pos = Integer.valueOf(e.getValue().split("\t")[2]);
@@ -502,43 +469,9 @@ public class Voc {
 		return map;
 	}
 		
-	private String makeLink (String query, UriInfo info) throws UnsupportedEncodingException{
-		String  link = "<a href=\""+info.getBaseUri()+"lookup?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
-				"<a class=\"namespace-link\" href=\""+query+"\" rel=\"nofollow\"> <img src=\""+info.getBaseUri()+"img/link.png\" title=\"go to the vocabulary\" /></a> ";
-		return link;
-	}
-	private String makeLink_sm (String query, UriInfo info) throws UnsupportedEncodingException{
-		String  link = "<a href=\""+info.getBaseUri()+"lookup?query="+URLEncoder.encode(query,"UTF-8")+"\">"+query+"</a>" +
-				"<a class=\"namespace-link\" href=\""+query+"\" rel=\"nofollow\"> <img src=\""+info.getBaseUri()+"img/link_sm.png\" title=\"go to the vocabulary\" /></a> ";
-		return link;
-	}
+
 	
-	//read file as String
-	private static String readFile(String in, ServletContext cont) {
-		File file = new File(cont.getRealPath("/WEB-INF"+in));
-		FileReader reader;
-		try {
-			reader = new FileReader(file);
-			BufferedReader br = new BufferedReader(reader);
-	
-		    StringBuffer sb = new StringBuffer();
-		    String eachLine = br.readLine();
-	
-		    while (eachLine != null) {
-		      sb.append(eachLine);
-		      sb.append("\n");
-		      eachLine = br.readLine();
-		    }
-		    return sb.toString();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
+
 	
 	private String beauStr(String str){
 		String out = "";
