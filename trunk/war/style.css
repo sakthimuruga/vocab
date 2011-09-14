@@ -161,15 +161,13 @@ input.home {
     font-size: 1.2em;
     font-weight: bold;
 }
-#logos {
+#licen img{
+	vertical-align: bottom;
+}
+#licen {
+
     bottom: 10px;
-    left: 15px;
+    right: 15px;
     position: fixed;
-    z-index: -1;
-}
-#logos img {
-    vertical-align: bottom;
-}
-#logos {
-    margin-left: 8px;
+    margin-right: 8px;
 }
