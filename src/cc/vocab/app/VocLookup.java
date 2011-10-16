@@ -168,7 +168,7 @@ public class VocLookup {
 	@Path("lookup")
 	@POST
 	@Produces("application/rdf+XML")
-	public Response searchXML_p(@FormParam("input") String input,  @Context ServletContext cont, @Context UriInfo info ){
+	public Response searchXML_p(String input,  @Context ServletContext cont, @Context UriInfo info ){
 		Model out = getOutput(input, cont, info);
 		OutputStream outstr = new ByteArrayOutputStream();
 		out.write(outstr, null);
@@ -177,7 +177,7 @@ public class VocLookup {
 	@Path("lookup")
 	@POST
 	@Produces("text/N3")
-	public Response searchN3_p(@FormParam("input") String input,  @Context ServletContext cont, @Context UriInfo info ){
+	public Response searchN3_p(String input,  @Context ServletContext cont, @Context UriInfo info ){
 		Model out = getOutput(input, cont, info);
 		OutputStream outstr = new ByteArrayOutputStream();
 		out.write(outstr, "N3");

@@ -87,7 +87,7 @@ public class VocSearch {
 	}
 	@POST
 	@Produces("application/rdf+xml")
-	public Response searchXML_p(@FormParam("input") String input, @Context ServletContext cont, @Context UriInfo info) throws IOException{
+	public Response searchXML_p(String input, @Context ServletContext cont, @Context UriInfo info) throws IOException{
 		Model model = this.getRDFbyPost(input, cont, info);
 		OutputStream out = new ByteArrayOutputStream();
 		model.write(out, null);
@@ -95,7 +95,7 @@ public class VocSearch {
 	}
 	@POST
 	@Produces("text/N3")
-	public Response searchN3_p(@FormParam("input") String input, @Context ServletContext cont, @Context UriInfo info) throws IOException{
+	public Response searchN3_p(String input, @Context ServletContext cont, @Context UriInfo info) throws IOException{
 		Model model = this.getRDFbyPost(input, cont, info);
 		OutputStream out = new ByteArrayOutputStream();
 		model.write(out, "N3");
@@ -172,7 +172,7 @@ public class VocSearch {
 				"@prefix so: <http://purl.org/linkedservices/ontology/SearchOntology#> . " +
 				"@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . " +
 				"@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . " +
-				"[] a so:Query ; " +
+				"<"+info.getBaseUri()+"search?query="+query+"#query> a so:Query ; " +
 				"	so:queryString \""+query+"\" ";
 
 		String detail ="";

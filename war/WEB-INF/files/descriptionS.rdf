@@ -13,4 +13,4 @@ rdf:type so:SearchEngine;
 posm:hasInputMessage [sawsdl:modelReference _:input];
 posm:hasOutputMessage [sawsdl:modelReference _:output].
 _:input rdf:value "{ [] a so:Query; so:queryString ?qStr . }"^^sparql:GraphPattern .
-_:output rdf:value "{ [] a so:Query; so:queryString ?qStr; so:result ?res. { { ?res a rdfs:Class; voc:usedAsClass ?number. } UNION { ?res a rdf:Property; voc:usedAsProperty ?number. }} }"^^sparql:GraphPattern .
+_:output rdf:value "{ ?q a so:Query; so:queryString ?qStr; so:result ?res. { { ?res a rdfs:Class; voc:usedAsClass ?number. } UNION { ?res a rdf:Property; voc:usedAsProperty ?number. }} }"^^sparql:GraphPattern .
