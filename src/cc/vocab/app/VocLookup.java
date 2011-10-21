@@ -26,7 +26,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.linkedservices.ServiceDescriptionLab;
+import org.linkedservices.bing2rdf.*;
 
 
 
