@@ -55,7 +55,7 @@ public class VocLookup {
 			@SuppressWarnings("unchecked")
 			Map<String, String> pref = (Map<String, String>) cont.getAttribute(Listener.prefixes);
 			String full = pref.get(query.split(":")[0]);
-			if(full==null || full.isEmpty() || full.equals("???")){
+			if((full==null || full.isEmpty() || full.equals("???")) || !query.contains(":")){
 				String uri = URLEncoder.encode(query, "UTF-8");
 				return Response.temporaryRedirect(URI.create("/search?query="+uri)).build();
 			}
