@@ -104,13 +104,13 @@ public class VocLookup {
 			
 			String ret = VocUtils.readFile("/files/resp.html", cont).replace("REPLACE_QUERY", VocUtils.makeLink(query, info));
 			ret = (cl > pro) ? ret	.replace("REPLACE_KIND", "Class")
-									.replace("REPLACE_OCCUR", "Occured overall "+beauStr(cNO)+" times <BR> and in "+beauStr(cND)+" datasets.")
+									.replace("REPLACE_OCCUR", "Occured overall "+beauStr(cNO)+" times <BR> and in "+beauStr(cND)+" documents.")
 									.replace("REPLACE_POSITION", "Is in Position "+beauStr(cPosO)+ " in the overall ranking <BR> " +
-											"and in Position "+beauStr(cPosD)+" of the dataset ranking.") 
+											"and in Position "+beauStr(cPosD)+" of the document ranking.") 
 							 : ret	.replace("REPLACE_KIND", "Property")
-							 		.replace("REPLACE_OCCUR", "Occured overall "+beauStr(pNO)+" times <BR> and in "+beauStr(pND)+" datasets.")
+							 		.replace("REPLACE_OCCUR", "Occured overall "+beauStr(pNO)+" times <BR> and in "+beauStr(pND)+" documents.")
 							 		.replace("REPLACE_POSITION", "Is in Position "+beauStr(pPosO)+ " in the overall ranking <BR> " +
-							 				"and in Position "+beauStr(pPosD)+" of the dataset ranking.")  ;
+							 				"and in Position "+beauStr(pPosD)+" of the document ranking.")  ;
 			return Response.ok(ret).build();
 		}else{
 			String uri = URLEncoder.encode(query, "UTF-8");
@@ -256,7 +256,7 @@ public class VocLookup {
 	public Response tcdHTML(@Context ServletContext cont, @Context UriInfo info ) throws UnsupportedEncodingException{
 		Map<Integer, String> map =getTopCd(cont);
 		String rep = "<table border=\"0\">";
-		rep += "<tr><td>No.</td><td></td><td>Occured in Datasets</td></tr>";
+		rep += "<tr><td>No.</td><td></td><td>Occured in Documents </td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
 			rep += "<tr><td>"+i+"</td><td>"+VocUtils.makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
@@ -298,7 +298,7 @@ public class VocLookup {
 	public Response tpdHTML(@Context ServletContext cont, @Context UriInfo info ) throws UnsupportedEncodingException{
 		Map<Integer, String> map =getTopPd(cont);
 		String rep = "<table border=\"0\">";
-		rep += "<tr><td>No.</td><td></td><td>Occured in Datasets</td></tr>";
+		rep += "<tr><td>No.</td><td></td><td>Occured in Documents</td></tr>";
 		for(int i = 1; i<=100; i++){
 			String tmp = map.get(i);
 			rep += "<tr><td>"+i+"</td><td>"+VocUtils.makeLink_sm(tmp.split("\t")[1], info)+"</td><td>"+tmp.split("\t")[0]+"</td></tr>";
@@ -357,7 +357,7 @@ public class VocLookup {
 			if(temp == null){
 				model += "" +
 						"<"+uri+"> voc:usedAsProperty \"0\" . " +
-						"<"+uri+"> voc:propertyUsedInDatasets \"0\" . "; 
+						"<"+uri+"> voc:propertyUsedInDocuments \"0\" . "; 
 			}else{
 				String pPosO = temp.split("\t")[0];
 				String pNO = temp.split("\t")[1];
@@ -366,8 +366,8 @@ public class VocLookup {
 				model += "" +
 					"<"+uri+"> voc:usedAsProperty \""+pNO+"\" . " +
 					"<"+uri+"> voc:posInPropRanking \""+pPosO+"\" . " +
-					"<"+uri+"> voc:posInPropDatasetRanking \""+pPosD+"\" . " +
-					"<"+uri+"> voc:propertyUsedInDatasets \""+pND+"\" . "; 
+					"<"+uri+"> voc:posInPropDocumentRanking \""+pPosD+"\" . " +
+					"<"+uri+"> voc:propertyUsedInDocuments \""+pND+"\" . "; 
 			}
 		}
 		if(type.equals("http://www.w3.org/2000/01/rdf-schema#Class")){
@@ -376,7 +376,7 @@ public class VocLookup {
 			if(temp == null){
 				model += "" +
 						"<"+uri+"> voc:usedAsClass \"0\" . " +
-						"<"+uri+"> voc:classUsedInDatasets \"0\" . "; 
+						"<"+uri+"> voc:classUsedInDocuments \"0\" . "; 
 			}else{
 				String cPosO = temp.split("\t")[0];
 				String cNO = temp.split("\t")[1];
@@ -385,8 +385,8 @@ public class VocLookup {
 				model += "" +
 					"<"+uri+"> voc:usedAsClass \""+cNO+"\" . " +
 					"<"+uri+"> voc:posInClassRanking \""+cPosO+"\" . " +
-					"<"+uri+"> voc:posInClassDatasetRanking \""+cPosD+"\" . " +
-					"<"+uri+"> voc:classUsedInDatasets \""+cND+"\" . "; 
+					"<"+uri+"> voc:posInClassDocumentRanking \""+cPosD+"\" . " +
+					"<"+uri+"> voc:classUsedInDocuments \""+cND+"\" . "; 
 			}
 		}
 		
