@@ -40,14 +40,14 @@ public class Schema {
 				"@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . " +
 				"@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . " +
 				"@prefix voc: <"+info.getBaseUri()+"schema/> . " +
-				"voc:classUsedInDatasets a rdf:Property ;" +
+				"voc:classUsedInDocuments a rdf:Property ;" +
 				"rdfs:domain rdfs:Class ;" +
 				"rdfs:range rdfs:Literal ;" +
-				"rdfs:comment \"Shows the number of datasets a class was used in the BTC dataset.\" . " +
-				"voc:posInClassDatasetRanking a rdf:Property ;" +
+				"rdfs:comment \"Shows the number of documents a class was used in the BTC dataset.\" . " +
+				"voc:posInClassDocumentRanking a rdf:Property ;" +
 				"rdfs:domain rdfs:Class ;" +
 				"rdfs:range rdfs:Literal ;" +
-				"rdfs:comment \"Shows the position of a class in the dataset ranking of classes. The ranking is ordered by the number of datasets a class was used in the BTC dataset.\" . " +
+				"rdfs:comment \"Shows the position of a class in the document ranking of classes. The ranking is ordered by the number of documents a class was used in the BTC dataset.\" . " +
 				"voc:posInClassRanking a rdf:Property ;" +
 				"rdfs:domain rdfs:Class ;" +
 				"rdfs:range rdfs:Literal ;" +
@@ -56,14 +56,14 @@ public class Schema {
 				"rdfs:domain rdfs:Class ;" +
 				"rdfs:range rdfs:Literal ;" +
 				"rdfs:comment \"Shows the number of overall occurences of a class in the BTC dataset.\" . " +
-				"voc:propertyUsedInDatasets a rdf:Property ;" +
+				"voc:propertyUsedInDocuemnts a rdf:Property ;" +
 				"rdfs:domain rdf:Property ;" +
 				"rdfs:range rdfs:Literal ;" +
-				"rdfs:comment \"Shows the number of datasets a property was used in the BTC dataset.\" . " +
-				"voc:posInPropDatasetRanking a rdf:Property ;" +
+				"rdfs:comment \"Shows the number of documents a property was used in the BTC dataset.\" . " +
+				"voc:posInPrDocumentRanking a rdf:Property ;" +
 				"rdfs:domain rdf:Property ;" +
 				"rdfs:range rdfs:Literal ;" +
-				"rdfs:comment \"Shows the position of a property in the dataset ranking of properties. The ranking is ordered by the number of datasets a property was used in the BTC dataset.\" . " +
+				"rdfs:comment \"Shows the position of a property in the document ranking of properties. The ranking is ordered by the number of documents a property was used in the BTC dataset.\" . " +
 				"voc:posInPropRanking a rdf:Property ;" +
 				"rdfs:domain rdf:Property ;" +
 				"rdfs:range rdfs:Literal ;" +
